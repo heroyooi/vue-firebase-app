@@ -61,20 +61,26 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .login-view {
-  max-width: 400px;
-  margin: 50px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-input {
-  padding: 8px;
-  font-size: 16px;
-}
-button {
-  margin-right: 10px;
-  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .error {
+    color: red;
+    font-weight: bold;
+  }
 }
 </style>
