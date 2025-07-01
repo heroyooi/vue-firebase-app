@@ -4,6 +4,7 @@
       <RouterLink to="/">홈</RouterLink>
       <RouterLink v-if="!user" to="/login">로그인</RouterLink>
       <RouterLink to="/posts">게시판</RouterLink>
+      <RouterLink v-if="user" to="/posts/new">글 작성</RouterLink>
       <span v-if="user">{{ user.email }}님</span>
       <button v-if="user" @click="logout">로그아웃</button>
     </nav>
