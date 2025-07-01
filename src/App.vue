@@ -1,14 +1,6 @@
 <template>
   <div id="app">
-    <header>
-      <nav>
-        <RouterLink to="/">홈</RouterLink> |
-        <RouterLink to="/login">로그인</RouterLink> |
-        <span v-if="user">{{ user.email }} 님</span>
-        <button v-if="user" @click="logout">로그아웃</button>
-      </nav>
-    </header>
-
+    <Header />
     <main>
       <RouterView />
     </main>
@@ -18,8 +10,10 @@
 <script>
 import { useUserStore } from './store/user';
 import { storeToRefs } from 'pinia';
+import Header from './components/Header.vue';
 
 export default {
+  components: { Header },
   setup() {
     const userStore = useUserStore();
     const { user } = storeToRefs(userStore);
@@ -32,7 +26,3 @@ export default {
   },
 };
 </script>
-
-<style>
-/* 동일 */
-</style>
