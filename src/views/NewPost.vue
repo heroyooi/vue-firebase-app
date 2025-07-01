@@ -10,6 +10,10 @@
         required
       ></textarea>
 
+      <input type="file" @change="handleFileChange" accept="image/*" />
+
+      <img v-if="previewUrl" :src="previewUrl" class="preview" />
+
       <button type="submit">등록하기</button>
     </form>
   </div>
@@ -18,23 +22,44 @@
 <script>
 import { ref } from 'vue';
 import { useUserStore } from '../store/user';
-import { createPost } from '../libs/postService';
 import { useRouter } from 'vue-router';
+import { uploadImage } from '../libs/uploadService';
+import { createPost } from '../libs/postService';
 
 export default {
   setup() {
     const content = ref('');
+    const imageFile = ref(null);
+    const previewUrl = ref('');
     const userStore = useUserStore();
     const router = useRouter();
 
+    const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        imageFile.value = file;
+        previewUrl.value = URL.createObjectURL(file);
+      }
+    };
+
     const submit = async () => {
       if (!content.value.trim()) return;
-      await createPost(userStore.user, content.value);
-      content.value = '';
+
+      let imageUrl = '';
+      if (imageFile.value) {
+        imageUrl = await uploadImage(imageFile.value);
+      }
+
+      await createPost(userStore.user, content.value, imageUrl);
       router.push('/posts');
     };
 
-    return { content, submit };
+    return {
+      content,
+      submit,
+      handleFileChange,
+      previewUrl,
+    };
   },
 };
 </script>
@@ -81,5 +106,12 @@ export default {
       }
     }
   }
+}
+
+.preview {
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 </style>

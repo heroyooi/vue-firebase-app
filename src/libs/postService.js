@@ -7,18 +7,20 @@ import {
   doc,
   query,
   orderBy,
+  serverTimestamp,
 } from 'firebase/firestore';
 
 const postsRef = collection(db, 'posts');
 
-export async function createPost(user, content) {
-  return await addDoc(postsRef, {
+export const createPost = async (user, content, imageUrl = '') => {
+  await addDoc(collection(db, 'posts'), {
     userId: user.uid,
     email: user.email,
     content,
-    createdAt: new Date(),
+    imageUrl,
+    createdAt: serverTimestamp(),
   });
-}
+};
 
 export async function getAllPosts() {
   const q = query(postsRef, orderBy('createdAt', 'desc'));

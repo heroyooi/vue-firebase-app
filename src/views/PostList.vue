@@ -19,6 +19,8 @@
           <small>{{ formatDate(post.createdAt) }}</small>
         </div>
 
+        <img v-if="post.imageUrl" :src="post.imageUrl" class="post-image" />
+
         <p class="content">{{ post.content }}</p>
 
         <div class="actions" v-if="user?.uid === post.userId">
@@ -159,6 +161,13 @@ export default {
             background-color: #d33;
           }
         }
+      }
+
+      .post-image {
+        width: 100%;
+        border-radius: 6px;
+        margin: 10px 0;
+        object-fit: cover;
       }
     }
   }
