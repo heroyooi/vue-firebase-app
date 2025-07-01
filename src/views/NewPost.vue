@@ -10,9 +10,16 @@
         required
       ></textarea>
 
-      <input type="file" @change="handleFileChange" accept="image/*" />
+      <input type="file" @change="handleFileChange" accept="image/*" multiple />
 
-      <img v-if="previewUrl" :src="previewUrl" class="preview" />
+      <div class="preview-list">
+        <img
+          v-for="(url, index) in previewUrls"
+          :key="index"
+          :src="url"
+          class="preview"
+        />
+      </div>
 
       <button type="submit">등록하기</button>
     </form>
@@ -29,36 +36,36 @@ import { createPost } from '../libs/postService';
 export default {
   setup() {
     const content = ref('');
-    const imageFile = ref(null);
-    const previewUrl = ref('');
+    const imageFiles = ref([]);
+    const previewUrls = ref([]);
     const userStore = useUserStore();
     const router = useRouter();
 
     const handleFileChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        imageFile.value = file;
-        previewUrl.value = URL.createObjectURL(file);
-      }
+      imageFiles.value = Array.from(e.target.files);
+      previewUrls.value = imageFiles.value.map((file) =>
+        URL.createObjectURL(file)
+      );
     };
 
     const submit = async () => {
       if (!content.value.trim()) return;
 
-      let imageUrl = '';
-      if (imageFile.value) {
-        imageUrl = await uploadImage(imageFile.value);
+      const uploadedUrls = [];
+      for (const file of imageFiles.value) {
+        const url = await uploadImage(file);
+        uploadedUrls.push(url);
       }
 
-      await createPost(userStore.user, content.value, imageUrl);
+      await createPost(userStore.user, content.value, uploadedUrls);
       router.push('/posts');
     };
 
     return {
       content,
-      submit,
       handleFileChange,
-      previewUrl,
+      submit,
+      previewUrls,
     };
   },
 };
@@ -108,10 +115,17 @@ export default {
   }
 }
 
-.preview {
-  width: 100%;
-  margin-top: 12px;
-  border-radius: 8px;
-  object-fit: cover;
+.preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
 }
 </style>

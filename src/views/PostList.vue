@@ -1,17 +1,6 @@
 <template>
   <div class="post-list">
     <h2>📃 게시글 목록</h2>
-
-    <form @submit.prevent="addPost" v-if="user" class="post-form">
-      <textarea
-        v-model="newPost"
-        placeholder="내용을 입력하세요"
-        rows="4"
-        required
-      />
-      <button type="submit">등록하기</button>
-    </form>
-
     <ul>
       <li v-for="post in posts" :key="post.id">
         <div class="info">
@@ -19,7 +8,15 @@
           <small>{{ formatDate(post.createdAt) }}</small>
         </div>
 
-        <img v-if="post.imageUrl" :src="post.imageUrl" class="post-image" />
+        <!-- 여러 이미지 표시 -->
+        <div class="image-list" v-if="post.imageUrls && post.imageUrls.length">
+          <img
+            v-for="(url, index) in post.imageUrls"
+            :key="index"
+            :src="url"
+            class="post-image"
+          />
+        </div>
 
         <p class="content">{{ post.content }}</p>
 
@@ -44,7 +41,6 @@ export default {
   components: { CommentBox },
   setup() {
     const posts = ref([]);
-    const newPost = ref('');
     const userStore = useUserStore();
     const { user } = storeToRefs(userStore);
 
@@ -52,15 +48,8 @@ export default {
       posts.value = await getAllPosts();
     };
 
-    const addPost = async () => {
-      if (!user.value || !newPost.value.trim()) return;
-      await createPost(user.value, newPost.value);
-      newPost.value = '';
-      await fetchPosts();
-    };
-
     const removePost = async (id) => {
-      await deletePost(id);
+      await deletePost(id, user.value);
       await fetchPosts();
     };
 
@@ -72,7 +61,7 @@ export default {
 
     onMounted(fetchPosts);
 
-    return { posts, newPost, addPost, removePost, user, formatDate };
+    return { posts, removePost, user, formatDate };
   },
 };
 </script>
@@ -87,36 +76,6 @@ export default {
     margin-bottom: 20px;
     text-align: center;
     color: #2c3e50;
-  }
-
-  .post-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 30px;
-
-    textarea {
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      resize: vertical;
-    }
-
-    button {
-      align-self: flex-end;
-      padding: 8px 16px;
-      background-color: #42b883;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #36996e;
-      }
-    }
   }
 
   ul {
@@ -163,11 +122,17 @@ export default {
         }
       }
 
-      .post-image {
-        width: 100%;
-        border-radius: 6px;
+      .image-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         margin: 10px 0;
-        object-fit: cover;
+
+        .post-image {
+          width: 100%;
+          border-radius: 6px;
+          object-fit: cover;
+        }
       }
     }
   }
