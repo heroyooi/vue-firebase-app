@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
   const initAuth = () => {
     onAuthStateChanged(auth, (firebaseUser) => {
       user.value = firebaseUser;
-      console.log('📡 사용자 상태 변경:', firebaseUser);
+      console.log('🔐 로그인됨:', firebaseUser?.displayName, firebaseUser?.email)
     });
   };
 
