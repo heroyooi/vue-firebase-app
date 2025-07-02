@@ -18,9 +18,16 @@
           />
         </div>
 
-        <p class="content">{{ post.content }}</p>
+        <div v-if="editingPostId === post.id">
+          <textarea v-model="editedContent" rows="4" class="edit-input" />
+          <button @click="saveEdit(post.id)">저장</button>
+          <button @click="cancelEdit">취소</button>
+        </div>
+        <p v-else class="content">{{ post.content }}</p>
 
+        <!-- 수정 & 삭제 버튼 -->
         <div class="actions" v-if="user?.uid === post.userId">
+          <button @click="startEdit(post)">수정</button>
           <button @click="removePost(post.id)">삭제</button>
         </div>
 
@@ -34,13 +41,16 @@
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '../store/user';
-import { createPost, getAllPosts, deletePost } from '../libs/postService';
+import { getAllPosts, deletePost, updatePost } from '../libs/postService';
 import CommentBox from '../components/CommentBox.vue';
 
 export default {
   components: { CommentBox },
+
   setup() {
     const posts = ref([]);
+    const editingPostId = ref(null);
+    const editedContent = ref('');
     const userStore = useUserStore();
     const { user } = storeToRefs(userStore);
 
@@ -53,6 +63,23 @@ export default {
       await fetchPosts();
     };
 
+    const startEdit = (post) => {
+      editingPostId.value = post.id;
+      editedContent.value = post.content;
+    };
+
+    const cancelEdit = () => {
+      editingPostId.value = null;
+      editedContent.value = '';
+    };
+
+    const saveEdit = async (id) => {
+      if (!editedContent.value.trim()) return;
+      await updatePost(id, editedContent.value);
+      editingPostId.value = null;
+      await fetchPosts();
+    };
+
     const formatDate = (ts) => {
       if (!ts) return '';
       const d = new Date(ts.seconds ? ts.seconds * 1000 : ts);
@@ -61,8 +88,19 @@ export default {
 
     onMounted(fetchPosts);
 
-    return { posts, removePost, user, formatDate };
-  },
+    return {
+      posts,
+      removePost,
+      user,
+      formatDate,
+      editingPostId,
+      editedContent,
+      startEdit,
+      cancelEdit,
+      saveEdit,
+    };
+  }
+
 };
 </script>
 
@@ -136,5 +174,15 @@ export default {
       }
     }
   }
+
+  .edit-input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
 }
 </style>

@@ -9,6 +9,7 @@ import {
   orderBy,
   serverTimestamp,
   getDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import { deleteImage } from './uploadService';
 
@@ -49,4 +50,9 @@ export const deletePost = async (id, currentUser) => {
   }
 
   await deleteDoc(postRef);
+};
+
+export const updatePost = async (id, content) => {
+  const postRef = doc(db, 'posts', id);
+  await updateDoc(postRef, { content });
 };
